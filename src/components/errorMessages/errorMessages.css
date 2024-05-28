@@ -1,0 +1,22 @@
+.errorMessage{
+    display: flex;
+    flex-direction: column;
+    justify-self: center;
+    align-items: center;
+    color: #eee;
+    font-weight: bold;
+    width: max-content;
+    padding: 20px;
+    margin: -20px;
+    z-index: 20;
+    position: relative;
+}
+.error{
+        background: #ff7777;
+        border:1px solid #ff0000;
+}
+.info{
+        background: #ffbd66;
+        border: 1px solid #ffb049;
+
+}

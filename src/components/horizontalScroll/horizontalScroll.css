@@ -1,0 +1,26 @@
+.horizontal-scroll{
+    overflow-x: auto;
+    white-space: nowrap;
+    scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* Internet Explorer 11 */
+}
+
+.horizontal-scroll::-webkit-scrollbar {
+  display: none; /* WebKit */
+}
+
+  .scroll-button {
+    margin: 5px;
+    padding: 8px;
+    cursor: pointer;
+    border: none;
+    border-radius: 4px;
+    font-size: 1rem;
+    font-weight: 200;
+  }
+  
+  .selected-button {
+    background-color: red;
+    color: white;
+  }
+  
