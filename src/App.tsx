@@ -44,71 +44,59 @@ const App = () => {
     }
   }, []);
 
-  const fetchScrollData = async () => {
-    let data: dataType;
-    try {
-      const params = new URLSearchParams();
-      initialParams.forEach((each: Record<string, any>) => {
-        for (const key in each) params.append(key, each[key]);
-      });
-      params.append("with_text_query", query);
-      params.append(
-        "with_genres",
-        selectedGenre[0] === 1 && selectedGenre.length === 1
-          ? ""
-          : selectedGenre.join("|"),
-      );
-      if (scrollDirection === "UP") {
-        params.append("primary_release_year", selectedYears[0].toString());
-      } else if (scrollDirection === "DOWN") {
+  const fetchMovies = useCallback(
+    async (isScroll: boolean = false) => {
+      let data: dataType;
+      try {
+        const params = new URLSearchParams();
+        initialParams.forEach((each: Record<string, any>) => {
+          for (const key in each) params.append(key, each[key]);
+        });
+        params.append("with_text_query", query);
         params.append(
-          "primary_release_year",
-          selectedYears[selectedYears.length - 1].toString(),
+          "with_genres",
+          selectedGenre[0] === 1 && selectedGenre.length === 1
+            ? ""
+            : selectedGenre.join("|"),
         );
-      }
-      if (selectedYears[selectedYears.length - 1] > new Date().getFullYear())
-        return;
 
-      const result = await fetch(`${BASE_URL}?${params}`);
-      data = await result.json();
-      if (scrollDirection === "UP") {
-        if (data.results.length) {
-          setMoviesData((c) => [data.results, ...c]);
-          window.scrollTo(0, 600);
+        if (isScroll) {
+          if (scrollDirection === "UP") {
+            params.append("primary_release_year", selectedYears[0].toString());
+          } else if (scrollDirection === "DOWN") {
+            params.append(
+              "primary_release_year",
+              selectedYears[selectedYears.length - 1].toString(),
+            );
+          }
+          if (
+            selectedYears[selectedYears.length - 1] > new Date().getFullYear()
+          )
+            return;
+        } else {
+          if (query.length === 0) params.append("primary_release_year", "2012");
         }
-      } else if (scrollDirection === "DOWN") {
-        if (data.results.length) setMoviesData((c) => [...c, data.results]);
+
+        const result = await fetch(`${BASE_URL}?${params}`);
+        data = await result.json();
+
+        if (isScroll) {
+          if (scrollDirection === "UP" && data.results.length) {
+            setMoviesData((c) => [data.results, ...c]);
+          } else if (scrollDirection === "DOWN" && data.results.length) {
+            setMoviesData((c) => [...c, data.results]);
+          }
+        } else {
+          setMoviesData([data.results]);
+        }
+      } catch (err) {
+        console.log(err);
+        setError((err) => ({ ...err, moviesError: true }));
       }
-    } catch (err) {
-      setError((err) => ({ ...err, moviesError: true }));
-    }
-  };
-  const fetchData = async () => {
-    let data: dataType;
-    try {
-      const params = new URLSearchParams();
-      initialParams.forEach((each: Record<string, any>) => {
-        for (const key in each) params.append(key, each[key]);
-      });
-      params.append("with_text_query", query);
-      if (query.length === 0) params.append("primary_release_year", "2012");
+    },
+    [query, selectedGenre, scrollDirection, selectedYears],
+  );
 
-      params.append(
-        "with_genres",
-        selectedGenre[0] === 1 && selectedGenre.length === 1
-          ? ""
-          : selectedGenre.join("|"),
-      );
-      console.log(params.toString());
-      const result = await fetch(`${BASE_URL}?${params}`);
-
-      data = await result.json();
-      setMoviesData([data.results]);
-    } catch (err) {
-      console.log(err);
-      setError((err) => ({ ...err, moviesError: true }));
-    }
-  };
   // Debounce search query
   useEffect(() => {
     const timerId = setTimeout(() => {
@@ -121,30 +109,42 @@ const App = () => {
 
   useEffect(() => {
     setSelectedYears([2012]);
-    fetchData();
+    fetchMovies();
   }, [debouncedQuery, selectedGenre]);
 
   useEffect(() => {
-    fetchScrollData();
+    if (scrollDirection) {
+      fetchMovies(true);
+    }
   }, [selectedYears]);
 
   useEffect(() => {
+    let isScrolling = false;
+
     const handleScroll = (prop: "UP" | "DOWN") => {
-      setScrollDirection(prop);
-      switch (prop) {
-        case "UP":
-          setSelectedYears((arr) => [arr[0] - 1, ...arr]);
-          break;
-        case "DOWN":
-          setSelectedYears((arr) => [...arr, arr[arr.length - 1] + 1]);
-          break;
-        default:
-          console.log("undefined action");
-          setScrollDirection("");
+      if (!isScrolling) {
+        isScrolling = true;
+        setScrollDirection(prop);
+        switch (prop) {
+          case "UP":
+            setSelectedYears((arr) => [arr[0] - 1, ...arr]);
+            break;
+          case "DOWN":
+            setSelectedYears((arr) => [...arr, arr[arr.length - 1] + 1]);
+            break;
+          default:
+            console.log("undefined action");
+            setScrollDirection("");
+        }
+        setTimeout(() => {
+          isScrolling = false;
+        }, 1000); // Prevents multiple triggers within 1 second
       }
     };
+
     handleGenreList();
-    window.addEventListener("scroll", () => {
+
+    const onScroll = () => {
       if (window.scrollY <= 0) {
         handleScroll("UP");
       } else if (
@@ -153,9 +153,14 @@ const App = () => {
       ) {
         handleScroll("DOWN");
       }
-    });
+    };
+
+    window.addEventListener("scroll", onScroll);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+    };
   }, []);
-  
+
   return (
     <div className="App">
       <header className="header">
@@ -178,13 +183,14 @@ const App = () => {
           <ErrorMessages header="Oops! Seems like you're out of luck." />
         ) : (
           <div className="movies-container">
-            {moviesData.map((data: Record<string, any>[]) => {
+            {moviesData.map((data: Record<string, any>[], index: number) => {
               return data?.length ? (
-                <MoviesList data={data} />
+                <MoviesList data={data} key={`movies-container-${index}`} />
               ) : (
                 <ErrorMessages
                   header="Seems we do not have the movie you are searching for"
                   type="error"
+                  key={`movies-container-${index}`}
                 />
               );
             })}
