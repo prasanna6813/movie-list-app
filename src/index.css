@@ -3,14 +3,7 @@
   padding: 0;
   box-sizing: border-box;
 }
-html {
-  overflow-y: scroll; /* Enable vertical scrolling */
-  -ms-overflow-style: none; /* IE and Edge */
-  scrollbar-width: none; /* Firefox */
-}
-html::-webkit-scrollbar {
-  display: none; /* WebKit browsers */
-}
+
 button {
   border: none;
   background-color: #fff;
