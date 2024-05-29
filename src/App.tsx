@@ -110,6 +110,10 @@ const App = () => {
     }
   };
 
+  useEffect(() => {
+    setTimeout(() => window.scrollTo(0, 1), 1000);
+  }, []);
+
   // Debounce search query
   useEffect(() => {
     const timerId = setTimeout(() => {
@@ -158,10 +162,10 @@ const App = () => {
     handleGenreList();
 
     const onScroll = () => {
-      if (window.scrollY <= 0) {
+      if (window.scrollY <= 20) {
         handleScroll("UP");
       } else if (
-        window.innerHeight + window.scrollY + 2 >=
+        window.innerHeight + window.scrollY + 20 >=
         document.body.offsetHeight
       ) {
         handleScroll("DOWN");

@@ -4,7 +4,6 @@
   box-sizing: border-box;
 }
 html {
-  max-height: 100vh;
   overflow-y: scroll; /* Enable vertical scrolling */
   -ms-overflow-style: none; /* IE and Edge */
   scrollbar-width: none; /* Firefox */

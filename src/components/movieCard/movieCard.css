@@ -49,6 +49,7 @@
 @media (min-width: 1301px) {
   .card-parent {
     width: 20%;
+    min-height: 400px;
   }
 }
 
