@@ -22,7 +22,11 @@ const MovieCard = ({
       className="card-parent"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}>
-      <img src={`${IMAGE_BASE_URL}${poster_path}`} alt={title} loading="lazy" />
+      <img
+        src={`${IMAGE_BASE_URL}${poster_path}`}
+        alt={title}
+        loading="eager"
+      />
 
       <div className="title-card">
         <div>

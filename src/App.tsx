@@ -1,5 +1,10 @@
-/* eslint-disable react-hooks/exhaustive-deps */
-import React, { useEffect, useState, useCallback, useMemo } from "react";
+import React, {
+  useEffect,
+  useState,
+  useCallback,
+  useMemo,
+  useRef,
+} from "react";
 import { getGenreList } from "./api/genreListApi";
 import "./App.css";
 import { BASE_URL } from "./constants/base_urls";
@@ -24,6 +29,9 @@ const App = () => {
   const [scrollDirection, setScrollDirection] = useState<"UP" | "DOWN" | "">(
     "",
   );
+  console.log(moviesData, "_moviesData");
+  const containerRef = useRef<HTMLDivElement>(null);
+
   const initialParams = useMemo(
     () => [
       { vote_count_gte: 150 },
@@ -44,7 +52,10 @@ const App = () => {
     }
   }, []);
 
-  const fetchMovies = async (isScroll: boolean = false) => {
+  const fetchMovies = async (
+    isScroll: boolean = false,
+    direction?: "UP" | "DOWN",
+  ) => {
     let data: dataType;
     try {
       const params = new URLSearchParams();
@@ -60,9 +71,9 @@ const App = () => {
       );
 
       if (isScroll) {
-        if (scrollDirection === "UP") {
+        if (direction === "UP") {
           params.append("primary_release_year", selectedYears[0].toString());
-        } else if (scrollDirection === "DOWN") {
+        } else if (direction === "DOWN") {
           params.append(
             "primary_release_year",
             selectedYears[selectedYears.length - 1].toString(),
@@ -78,9 +89,17 @@ const App = () => {
       data = await result.json();
 
       if (isScroll) {
-        if (scrollDirection === "UP" && data.results.length) {
+        if (direction === "UP" && data.results.length) {
+          const container = containerRef.current;
+          const currentHeight = container ? container.scrollHeight : 0;
+
           setMoviesData((c) => [data.results, ...c]);
-        } else if (scrollDirection === "DOWN" && data.results.length) {
+
+          setTimeout(() => {
+            const newHeight = container ? container.scrollHeight : 0;
+            window.scrollTo(0, newHeight - currentHeight);
+          }, 0);
+        } else if (direction === "DOWN" && data.results.length) {
           setMoviesData((c) => [...c, data.results]);
         }
       } else {
@@ -109,7 +128,7 @@ const App = () => {
 
   useEffect(() => {
     if (scrollDirection) {
-      fetchMovies(true);
+      fetchMovies(true, scrollDirection);
     }
   }, [selectedYears]);
 
@@ -173,22 +192,14 @@ const App = () => {
           <ErrorMessages header="Failed to fetch Genres" />
         )}
       </header>
-      <section className="movieListContainer">
-        {moviesData?.length === 0 ? (
+      <section className="movieListContainer" ref={containerRef}>
+        {moviesData.length === 0 ? (
           <ErrorMessages header="Oops! Seems like you're out of luck." />
         ) : (
           <div className="movies-container">
-            {moviesData.map((data: Record<string, any>[], index: number) => {
-              return data?.length ? (
-                <MoviesList data={data} key={`movies-container-${index}`} />
-              ) : (
-                <ErrorMessages
-                  header="Seems we do not have the movie you are searching for"
-                  type="error"
-                  key={`movies-container-${index}`}
-                />
-              );
-            })}
+            {moviesData.map((data, index) => (
+              <MoviesList data={data} key={index} />
+            ))}
           </div>
         )}
       </section>

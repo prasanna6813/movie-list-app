@@ -4,7 +4,7 @@ import "./movieList.css";
 type movieListPropType = {
   data: Record<string, any>[];
 };
-const MoviesList = (props: movieListPropType) => {
+const MoviesList = memo((props: movieListPropType) => {
   const { data } = props;
   return (
     <div>
@@ -27,6 +27,6 @@ const MoviesList = (props: movieListPropType) => {
       </div>
     </div>
   );
-};
+});
 
-export default memo(MoviesList);
+export default MoviesList;
