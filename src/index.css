@@ -4,7 +4,14 @@
   box-sizing: border-box;
 }
 html {
+  max-height: 100vh;
   scroll-behavior: smooth;
+  overflow-y: scroll; /* Enable vertical scrolling */
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+html::-webkit-scrollbar {
+  display: none; /* WebKit browsers */
 }
 button {
   border: none;
