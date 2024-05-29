@@ -44,58 +44,53 @@ const App = () => {
     }
   }, []);
 
-  const fetchMovies = useCallback(
-    async (isScroll: boolean = false) => {
-      let data: dataType;
-      try {
-        const params = new URLSearchParams();
-        initialParams.forEach((each: Record<string, any>) => {
-          for (const key in each) params.append(key, each[key]);
-        });
-        params.append("with_text_query", query);
-        params.append(
-          "with_genres",
-          selectedGenre[0] === 1 && selectedGenre.length === 1
-            ? ""
-            : selectedGenre.join("|"),
-        );
+  const fetchMovies = async (isScroll: boolean = false) => {
+    let data: dataType;
+    try {
+      const params = new URLSearchParams();
+      initialParams.forEach((each: Record<string, any>) => {
+        for (const key in each) params.append(key, each[key]);
+      });
+      params.append("with_text_query", query);
+      params.append(
+        "with_genres",
+        selectedGenre[0] === 1 && selectedGenre.length === 1
+          ? ""
+          : selectedGenre.join("|"),
+      );
 
-        if (isScroll) {
-          if (scrollDirection === "UP") {
-            params.append("primary_release_year", selectedYears[0].toString());
-          } else if (scrollDirection === "DOWN") {
-            params.append(
-              "primary_release_year",
-              selectedYears[selectedYears.length - 1].toString(),
-            );
-          }
-          if (
-            selectedYears[selectedYears.length - 1] > new Date().getFullYear()
-          )
-            return;
-        } else {
-          if (query.length === 0) params.append("primary_release_year", "2012");
+      if (isScroll) {
+        if (scrollDirection === "UP") {
+          params.append("primary_release_year", selectedYears[0].toString());
+        } else if (scrollDirection === "DOWN") {
+          params.append(
+            "primary_release_year",
+            selectedYears[selectedYears.length - 1].toString(),
+          );
         }
-
-        const result = await fetch(`${BASE_URL}?${params}`);
-        data = await result.json();
-
-        if (isScroll) {
-          if (scrollDirection === "UP" && data.results.length) {
-            setMoviesData((c) => [data.results, ...c]);
-          } else if (scrollDirection === "DOWN" && data.results.length) {
-            setMoviesData((c) => [...c, data.results]);
-          }
-        } else {
-          setMoviesData([data.results]);
-        }
-      } catch (err) {
-        console.log(err);
-        setError((err) => ({ ...err, moviesError: true }));
+        if (selectedYears[selectedYears.length - 1] > new Date().getFullYear())
+          return;
+      } else {
+        if (query.length === 0) params.append("primary_release_year", "2012");
       }
-    },
-    [query, selectedGenre, scrollDirection, selectedYears],
-  );
+
+      const result = await fetch(`${BASE_URL}?${params}`);
+      data = await result.json();
+
+      if (isScroll) {
+        if (scrollDirection === "UP" && data.results.length) {
+          setMoviesData((c) => [data.results, ...c]);
+        } else if (scrollDirection === "DOWN" && data.results.length) {
+          setMoviesData((c) => [...c, data.results]);
+        }
+      } else {
+        setMoviesData([data.results]);
+      }
+    } catch (err) {
+      console.log(err);
+      setError((err) => ({ ...err, moviesError: true }));
+    }
+  };
 
   // Debounce search query
   useEffect(() => {
