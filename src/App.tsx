@@ -29,7 +29,6 @@ const App = () => {
   const [scrollDirection, setScrollDirection] = useState<"UP" | "DOWN" | "">(
     "",
   );
-  console.log(moviesData, "_moviesData");
   const containerRef = useRef<HTMLDivElement>(null);
 
   const initialParams = useMemo(
