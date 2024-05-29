@@ -3,5 +3,4 @@ export type MovieCardType={
     poster_path:string,
     overview:string,
     vote_average:number,
-    key:number
     }

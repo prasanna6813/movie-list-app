@@ -197,7 +197,7 @@ const App = () => {
       </header>
       <section className="movieListContainer" ref={containerRef}>
         {moviesData.length === 0 ? (
-          <ErrorMessages header="Oops! Seems like you're out of luck." />
+          <ErrorMessages header="Movies not found!" />
         ) : (
           <div className="movies-container">
             {moviesData.map((data, index) => (

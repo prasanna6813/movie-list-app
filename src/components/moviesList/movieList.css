@@ -40,7 +40,8 @@ p {
 
 @media (min-width: 720px) {
   .movie-list__heading {
-    margin: 45px 0px 20px;
+    font-size: 48px;
+    margin: 54px 0px 34px;
     justify-content: center;
     display: grid;
   }
