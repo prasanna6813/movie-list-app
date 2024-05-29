@@ -7,7 +7,7 @@
   ```
   REACT_APP_API_KEY = <your_api_key>
   ```
-* `npm start` - to view it project the browser,
+* `npm start` - to view it project in the browser,
 
 * note - use node latest version
 
